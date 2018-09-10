@@ -14,6 +14,8 @@ clipboard.copy('hello', function(r) {
     console.log(r ? 'fail' : 'success！');
 });
 ```
+
+代码参照[clipboard](https://github.com/zenorocha/clipboard.js)简化写的 
 ## License
 
 [MIT License](http://zenorocha.mit-license.org/) © Zeno Rocha
