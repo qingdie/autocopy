@@ -92,15 +92,15 @@ var clipboard = new(function() {
             var r = ecopy();
             if (!r) {
                 document.body.removeChild(e);
-                cb(r);
-                rcb();
+                cb && cb(r);
+                rcb && rcb();
             } else {
-                eready(function(rcb) {
+                eready(function(retcb) {
                     selectE(e);
                     var r = ecopy();
                     document.body.removeChild(e);
-                    cb(r);
-                    rcb();
+                    cb && cb(r);
+                    retcb && retcb();
                 });
             }
         }, 1);
