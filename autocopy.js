@@ -73,7 +73,9 @@ var clipboard = new(function() {
     var eready = function(cb, times) {
         var uagen = navigator.userAgent.toLowerCase();
         if (/micromessenger/i.test(uagen)) {
-            wxready(cb);
+            wxready(function(){
+                cb();
+            });
         } else if (times == 1) {
             cb();
         } else {
