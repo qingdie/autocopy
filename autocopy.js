@@ -70,43 +70,52 @@ var clipboard = new(function() {
             }
         }
     }
-    var eready = function(cb, times) {
+    var touchready = function(cb) {
+        var ac = "ontouchend" in document ? 'touchend' : "onpointerdown" in document ? 'pointerup' : "onmspointerdown" in document ? 'MSPointerUp' : 'click';
+        var der = _delegate(document, null, ac, function() {
+            cb(function() {
+                der.destroy();
+            });
+        });
+    }
+    var wxcopy = function(e, cb, times) {
+        times = times || 1;
+        if (times > 3) return cb('fail');
         var uagen = navigator.userAgent.toLowerCase();
         if (/micromessenger/i.test(uagen)) {
-            wxready(cb);
-        } else if (times == 1) {
-            cb();
-        } else {
-            var ac = "ontouchend" in document ? 'touchend' : "onpointerdown" in document ? 'pointerup' : "onmspointerdown" in document ? 'MSPointerUp' : 'click';
-            var der = _delegate(document, null, ac, function() {
-                cb(function() {
-                    der.destroy();
-                });
+            wxready(function() {
+                selectE(e);
+                var r = ecopy();
+                if (!r) return cb();
+                wxcopy(e, cb, ++times);
             });
+        } else {
+            cb('nowx');
         }
     }
-    this.copy = function(text, cb) {
-        eready(function(rcb) {
-            var e = creatFakeElem(text);
+    var touchcopy = function(e, cb) {
+        var times = 0;
+        touchready(function(rcb) {
             selectE(e);
             var r = ecopy();
             if (!r) {
-                document.body.removeChild(e);
-                cb(r);
                 rcb();
-            } else {
-                eready(function(rcb) {
-                    selectE(e);
-                    var r = ecopy();
-                    document.body.removeChild(e);
-                    cb(r);
-                    rcb();
-                });
+                return cb();
             }
-        }, 1);
+            if (++times > 3) {
+                rcb();
+                return cb('fail');
+            }
+        });
+    }
+    this.copy = function(text, cb) {
+        var e = creatFakeElem(text);
+        selectE(e);
+        var r = ecopy();
+        if (!r) return cb();
+        wxcopy(e, function(r) {
+            if (!r) return cb();
+            touchcopy(e, cb);
+        });
     }
 })();
-clipboard.copy('啦啦啦', function(r) {
-    console.log(r ? '失败' : '成功！');
-    alert(r ? '失败' : '成功！');
-});
